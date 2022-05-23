@@ -1,4 +1,4 @@
-From 93aeb9e1d803bae947d8a47ce90a1a57663ee0da Mon Sep 17 00:00:00 2001
+From d27cafea21c3453dde3ba1c4988be877fb146543 Mon Sep 17 00:00:00 2001
 From: Ondřej Jirman
 Date: Tue, 20 Aug 2019 14:29:29 +0200
 Subject: net: stmmac: sun8i: Rename PHY regulator variable to regulator_phy
@@ -8,47 +8,32 @@ what the regulator is for.
 
 Signed-off-by: Ondrej Jirman <megi@xff.cz>
 ---
- drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c | 40 +++++++++++------------
- 1 file changed, 20 insertions(+), 20 deletions(-)
+ drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c b/drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c
-index c0c8ce1f8b00..b44f14c278ca 100644
+index a1e2304654b2..47f0131be3c8 100644
 --- a/drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c
 +++ b/drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c
-@@ -57,20 +57,22 @@ struct emac_variant {
- };
+@@ -59,7 +59,7 @@ struct emac_variant {
  
  /* struct sunxi_priv_data - hold all sunxi private data
-- * @tx_clk:	reference to MAC TX clock
-- * @ephy_clk:	reference to the optional EPHY clock for the internal PHY
+  * @ephy_clk:	reference to the optional EPHY clock for the internal PHY
 - * @regulator:	reference to the optional regulator
-- * @rst_ephy:	reference to the optional EPHY reset for the internal PHY
-- * @variant:	reference to the current board variant
-- * @regmap:	regmap for using the syscon
-- * @internal_phy_powered: Does the internal PHY is enabled
-- * @use_internal_phy: Is the internal PHY selected for use
-- * @mux_handle:	Internal pointer used by mdio-mux lib
-+ * @tx_clk:			reference to MAC TX clock
-+ * @ephy_clk:			reference to the optional EPHY clock for
-+ *				the internal PHY
-+ * @regulator_phy:		reference to the optional regulator
-+ * @rst_ephy:			reference to the optional EPHY reset for
-+ *				the internal PHY
-+ * @variant:			reference to the current board variant
-+ * @regmap:			regmap for using the syscon
-+ * @internal_phy_powered:	Does the internal PHY is enabled
-+ * @use_internal_phy:		Is the internal PHY selected for use
-+ * @mux_handle:			Internal pointer used by mdio-mux lib
++ * @regulator_phy: reference to the optional regulator
+  * @rst_ephy:	reference to the optional EPHY reset for the internal PHY
+  * @variant:	reference to the current board variant
+  * @regmap:	regmap for using the syscon
+@@ -69,7 +69,7 @@ struct emac_variant {
   */
  struct sunxi_priv_data {
- 	struct clk *tx_clk;
  	struct clk *ephy_clk;
 -	struct regulator *regulator;
 +	struct regulator *regulator_phy;
  	struct reset_control *rst_ephy;
  	const struct emac_variant *variant;
  	struct regmap_field *regmap_field;
-@@ -571,9 +573,9 @@ static int sun8i_dwmac_init(struct platform_device *pdev, void *priv)
+@@ -570,9 +570,9 @@ static int sun8i_dwmac_init(struct platform_device *pdev, void *priv)
  	struct sunxi_priv_data *gmac = priv;
  	int ret;
  
@@ -60,41 +45,37 @@ index c0c8ce1f8b00..b44f14c278ca 100644
  		return ret;
  	}
  
-@@ -594,8 +596,7 @@ static int sun8i_dwmac_init(struct platform_device *pdev, void *priv)
- err_disable_clk:
- 	clk_disable_unprepare(gmac->tx_clk);
+@@ -585,7 +585,7 @@ static int sun8i_dwmac_init(struct platform_device *pdev, void *priv)
+ 	return 0;
+ 
  err_disable_regulator:
--	if (gmac->regulator)
--		regulator_disable(gmac->regulator);
+-	regulator_disable(gmac->regulator);
 +	regulator_disable(gmac->regulator_phy);
  
  	return ret;
  }
-@@ -1043,7 +1044,7 @@ static void sun8i_dwmac_exit(struct platform_device *pdev, void *priv)
- 
- 	clk_disable_unprepare(gmac->tx_clk);
+@@ -1032,7 +1032,7 @@ static void sun8i_dwmac_exit(struct platform_device *pdev, void *priv)
+ 	if (gmac->variant->soc_has_internal_phy)
+ 		sun8i_dwmac_unpower_internal_phy(gmac);
  
 -	regulator_disable(gmac->regulator);
 +	regulator_disable(gmac->regulator_phy);
  }
  
  static void sun8i_dwmac_set_mac_loopback(void __iomem *ioaddr, bool enable)
-@@ -1171,11 +1172,10 @@ static int sun8i_dwmac_probe(struct platform_device *pdev)
+@@ -1154,9 +1154,9 @@ static int sun8i_dwmac_probe(struct platform_device *pdev)
  	}
  
  	/* Optional regulator for PHY */
 -	gmac->regulator = devm_regulator_get(dev, "phy");
--	if (IS_ERR(gmac->regulator)) {
--		ret = PTR_ERR(gmac->regulator);
--		if (ret != -EPROBE_DEFER)
--			dev_err(dev, "Failed to get PHY regulator (%d)\n", ret);
+-	if (IS_ERR(gmac->regulator))
+-		return dev_err_probe(dev, PTR_ERR(gmac->regulator),
 +	gmac->regulator_phy = devm_regulator_get(dev, "phy");
-+	if (IS_ERR(gmac->regulator_phy)) {
-+		ret = PTR_ERR(gmac->regulator_phy);
-+		dev_err_probe(dev, ret, "Failed to get PHY regulator\n");
- 		return ret;
- 	}
++	if (IS_ERR(gmac->regulator_phy))
++		return dev_err_probe(dev, PTR_ERR(gmac->regulator_phy),
+ 				     "Failed to get PHY regulator\n");
  
+ 	/* The "GMAC clock control" register might be located in the
 -- 
 cgit v1.2.3
 

@@ -1,4 +1,4 @@
-From f218d6271e4036d62d4a6e4d94ef3f3795f0e2b8 Mon Sep 17 00:00:00 2001
+From fca92a8ac59a01025f0e4dc203cba6f2b332cf74 Mon Sep 17 00:00:00 2001
 From: Ondřej Jirman
 Date: Tue, 20 Aug 2019 14:54:48 +0200
 Subject: arm64: dts: allwinner: orange-pi-3: Enable ethernet

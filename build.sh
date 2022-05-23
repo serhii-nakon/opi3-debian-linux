@@ -2,7 +2,7 @@
 
 set -e
 
-LINUX_VERSION=5.17.9
+LINUX_VERSION=5.18
 
 apt update
 apt full-upgrade -y
