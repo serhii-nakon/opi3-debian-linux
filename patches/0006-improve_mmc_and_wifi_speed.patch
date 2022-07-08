@@ -1,0 +1,21 @@
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h6-orangepi-3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h6-orangepi-3.dts
+index c45d7b7..82a649a 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h6-orangepi-3.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h6-orangepi-3.dts
+@@ -141,6 +141,8 @@
+ 	mmc-pwrseq = <&wifi_pwrseq>;
+ 	bus-width = <4>;
+ 	non-removable;
++	sd-uhs-sdr104;
++	cap-sdio-irq;
+ 	status = "okay";
+ 
+ 	brcm: sdio-wifi@1 {
+@@ -158,6 +160,7 @@
+ 	cap-mmc-hw-reset;
+ 	non-removable;
+ 	bus-width = <8>;
++	mmc-hs200-1_8v;
+ 	status = "okay";
+ };
+ 
